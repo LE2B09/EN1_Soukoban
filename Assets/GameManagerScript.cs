@@ -7,7 +7,6 @@ public class GameManagerScript : MonoBehaviour
     public GameObject playerPrefab;
     int[,] map;
     GameObject[,] field;
-    GameObject obj;
 
     //void PrintArray()
     //{
