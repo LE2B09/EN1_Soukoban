@@ -18,20 +18,17 @@ public class GameManagerScript : MonoBehaviour
     //    Debug.Log(debugText);
     //}
 
-    int GetPlayerIndex()
-    {
-        for (int i = 0; i < map.Length; i++)
-        {
-            for (int j = 0; j < map.Length; j++)
-            {
-                if (map[j, i] == 1)
-                {
-                    return 1;
-                }
-            }
-        }
-        return -1;
-    }
+    //int GetPlayerIndex()
+    //{
+    //    for (int i = 0; i < map.Length; i++)
+    //    {
+    //        if (map[i] == 1)
+    //        {
+    //            return i;
+    //        }
+    //    }
+    //    return -1;
+    //}
 
     //bool MoveNumber(int number, int moveFrom, int moveTo)
     //{
