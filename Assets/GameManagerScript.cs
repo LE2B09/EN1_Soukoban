@@ -18,32 +18,38 @@ public class GameManagerScript : MonoBehaviour
     //    Debug.Log(debugText);
     //}
 
-    //int GetPlayerIndex()
-    //{
-    //    for (int i = 0; i < map.Length; i++)
-    //    {
-    //        if (map[i] == 1)
-    //        {
-    //            return i;
-    //        }
-    //    }
-    //    return -1;
-    //}
+    Vector2Int GetPlayerIndex()
+    {
+        for (int y = 0; y < map.Length; y++)
+        {
+            for (int x = 0; x < field.Length; x++)
+            {
+                if (x == -1 && y == -1)
+                {
+                    return GetPlayerIndex();
+                }
+            }
+        }
+        return -GetPlayerIndex();
+    }
 
-    //bool MoveNumber(int number, int moveFrom, int moveTo)
-    //{
-    //    if (moveTo < 0 || moveTo >= map.Length) { return false; }
-    //    if (map[moveTo] == 2)
-    //    {
-    //        int velocity = moveTo - moveFrom;
-    //        bool success = MoveNumber(2, moveTo, moveTo + velocity);
-    //        if (!success) { return false; }
-    //    }
+    bool MoveNumber(int number, int moveFrom, int moveTo)
+    {
+        GameObject obj = null;
+        obj.transform.position = new Vector3();
 
-    //    map[moveTo] = number;
-    //    map[moveFrom] = 0;
-    //    return true;
-    //}
+        if (moveTo < 0 || moveTo >= map.Length) { return false; }
+        if (map[moveTo] == 2)
+        {
+            int velocity = moveTo - moveFrom;
+            bool success = MoveNumber(2, moveTo, moveTo + velocity);
+            if (!success) { return false; }
+        }
+
+        map[moveTo] = number;
+        map[moveFrom] = 0;
+        return true;
+    }
 
     // Start is called before the first frame update
     void Start()
@@ -69,7 +75,7 @@ public class GameManagerScript : MonoBehaviour
             {
                 if (map[x, y] == 1)
                 {
-                    field[y, x] = Instantiate(playerPrefab, new Vector3(0, 0, 0), Quaternion.identity);
+                    field[y, x] = Instantiate(playerPrefab, new Vector3(), Quaternion.identity);
                 }
             }
         }
