@@ -44,13 +44,11 @@ public class GameManagerScript : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
-        // GameObject instance = Instantiate(playerPrefab, new Vector3(0, 0, 0), Quaternion.identity);
-
         map = new int[,]
         {
             {0,0,0,0,0},
-            {0,0,0,0,0},
-            {0,0,0,0,1}
+            {0,0,1,0,0},
+            {0,0,0,0,0}
         };
 
         field = new GameObject
@@ -63,7 +61,7 @@ public class GameManagerScript : MonoBehaviour
         {
             for (int x = 0; x < map.GetLength(1); x++)
             {
-                if (map[x, y] == 1)
+                if (map[y, x] == 1)
                 {
                     field[y, x] = Instantiate(playerPrefab, new Vector3(x, map.GetLength(0) - y, 0), Quaternion.identity);
                 }
@@ -74,6 +72,18 @@ public class GameManagerScript : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
+        if (Input.GetKeyUp(KeyCode.UpArrow))
+        {
+            Vector2Int playerIndex = GetPlayerIndex();
+            MoveNumber("Player", playerIndex, playerIndex + new Vector2Int(0, -1));
+        }
+
+        if (Input.GetKeyUp(KeyCode.DownArrow))
+        {
+            Vector2Int playerIndex = GetPlayerIndex();
+            MoveNumber("Player", playerIndex, playerIndex + new Vector2Int(0, 1));
+        }
+
         if (Input.GetKeyUp(KeyCode.RightArrow))
         {
             Vector2Int playerIndex = GetPlayerIndex();
@@ -85,6 +95,5 @@ public class GameManagerScript : MonoBehaviour
             Vector2Int playerIndex = GetPlayerIndex();
             MoveNumber("Player", playerIndex, playerIndex + new Vector2Int(-1, 0));
         }
-
     }
 }
