@@ -5,6 +5,7 @@ using UnityEngine;
 public class GameManagerScript : MonoBehaviour
 {
     public GameObject playerPrefab;
+    public GameObject boxPrefab;
     int[,] map;
     GameObject[,] field;
 
@@ -27,7 +28,7 @@ public class GameManagerScript : MonoBehaviour
         if (moveTo.x < 0 || moveTo.x >= field.GetLength(1)) { return false; }
 
         //nullチェックしてからタグチェックを行う
-        if (field[moveTo.y, moveTo.x] != null && field[moveTo.y, moveTo.x].tag == "BOX")
+        if (field[moveTo.y, moveTo.x] != null && field[moveTo.y, moveTo.x].tag == "Box")
         {
             Vector2Int velocity = moveTo - moveFrom;
             bool success = MoveNumber(tag, moveTo, moveTo + velocity);
@@ -46,9 +47,11 @@ public class GameManagerScript : MonoBehaviour
     {
         map = new int[,]
         {
-            {0,0,0,0,0},
-            {0,0,1,0,0},
-            {0,0,0,0,0}
+            {0,0,0,0,0,0},
+            {0,0,0,0,0,0},
+            {0,0,1,2,0,0},
+            {0,0,0,0,0,0},
+            {0,0,0,0,0,0}
         };
 
         field = new GameObject
@@ -64,6 +67,10 @@ public class GameManagerScript : MonoBehaviour
                 if (map[y, x] == 1)
                 {
                     field[y, x] = Instantiate(playerPrefab, new Vector3(x, map.GetLength(0) - y, 0), Quaternion.identity);
+                }
+                if (map[y, x] == 2)
+                {
+                    field[y, x] = Instantiate(boxPrefab, new Vector3(x, map.GetLength(0) - y, 0), Quaternion.identity);
                 }
             }
         }
