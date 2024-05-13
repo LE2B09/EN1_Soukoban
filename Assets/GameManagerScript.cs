@@ -6,6 +6,7 @@ public class GameManagerScript : MonoBehaviour
 {
     public GameObject playerPrefab;
     public GameObject boxPrefab;
+    public GameObject goalPrefab;
     public GameObject clearText;
     int[,] map;
     GameObject[,] field;
@@ -81,7 +82,7 @@ public class GameManagerScript : MonoBehaviour
         map = new int[,]    //3Çäiî[èÍèäÇ∆Ç∑ÇÈ
         {
             {0, 0, 0, 0, 0},
-            {0, 0, 1, 0, 0},
+            {0, 0, 1, 2, 3},
             {0, 0, 2, 0, 0},
             {0, 0, 3, 0, 0},
             {0, 0, 0, 0, 0}
@@ -104,6 +105,10 @@ public class GameManagerScript : MonoBehaviour
                 if (map[y, x] == 2)
                 {
                     field[y, x] = Instantiate(boxPrefab, new Vector3(x, map.GetLength(0) - 1 - y, 0), Quaternion.identity);
+                } 
+                if (map[y, x] == 3)
+                {
+                    field[y, x] = Instantiate(goalPrefab, new Vector3(x, map.GetLength(0) - 1 - y, 0), Quaternion.identity);
                 }
             }
         }
