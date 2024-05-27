@@ -29,7 +29,7 @@ public class GameManagerScript : MonoBehaviour
         if (moveTo.y < 0 || moveTo.y >= field.GetLength(0)) { return false; }
         if (moveTo.x < 0 || moveTo.x >= field.GetLength(1)) { return false; }
 
-        //nullチェックしてからタグチェックを行う
+        // nullチェックしてからタグチェックを行う
         if (field[moveTo.y, moveTo.x] != null && field[moveTo.y, moveTo.x].tag == "Box")
         {
             Vector2Int velocity = moveTo - moveFrom;
@@ -37,14 +37,22 @@ public class GameManagerScript : MonoBehaviour
             if (!success) { return false; }
         }
 
-        field[moveFrom.y, moveFrom.x].transform.position = new Vector3(moveTo.x, field.GetLength(0) - 1 - moveTo.y, 0);
+        Vector3 moveToPosition = new Vector3(moveTo.x, map.GetLength(0) - 1 - moveTo.y, 0);
+        Move moveComponent = field[moveFrom.y, moveFrom.x].GetComponent<Move>();
+
+        if (moveComponent != null)
+        {
+            moveComponent.MoveTo(moveToPosition);
+        }
+
         field[moveTo.y, moveTo.x] = field[moveFrom.y, moveFrom.x];
         field[moveFrom.y, moveFrom.x] = null;
 
         return true;
     }
 
-    bool IsCreared()
+
+    bool IsCleared()
     {
         //Vector2Int型の可変長配列の作成
         List<Vector2Int> goals = new();
@@ -105,7 +113,7 @@ public class GameManagerScript : MonoBehaviour
                 if (map[y, x] == 2)
                 {
                     field[y, x] = Instantiate(boxPrefab, new Vector3(x, map.GetLength(0) - 1 - y, 0), Quaternion.identity);
-                } 
+                }
                 if (map[y, x] == 3)
                 {
                     field[y, x] = Instantiate(goalPrefab, new Vector3(x, map.GetLength(0) - 1 - y, 0), Quaternion.identity);
@@ -117,35 +125,36 @@ public class GameManagerScript : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        if (Input.GetKeyUp(KeyCode.UpArrow))
+        if (Input.GetKeyDown(KeyCode.UpArrow))
         {
             Vector2Int playerIndex = GetPlayerIndex();
             MoveNumber("Player", playerIndex, playerIndex + new Vector2Int(0, -1));
         }
 
-        if (Input.GetKeyUp(KeyCode.DownArrow))
+        if (Input.GetKeyDown(KeyCode.DownArrow))
         {
             Vector2Int playerIndex = GetPlayerIndex();
             MoveNumber("Player", playerIndex, playerIndex + new Vector2Int(0, 1));
         }
 
-        if (Input.GetKeyUp(KeyCode.RightArrow))
+        if (Input.GetKeyDown(KeyCode.RightArrow))
         {
             Vector2Int playerIndex = GetPlayerIndex();
             MoveNumber("Player", playerIndex, playerIndex + new Vector2Int(1, 0));
         }
 
-        if (Input.GetKeyUp(KeyCode.LeftArrow))
+        if (Input.GetKeyDown(KeyCode.LeftArrow))
         {
             Vector2Int playerIndex = GetPlayerIndex();
             MoveNumber("Player", playerIndex, playerIndex + new Vector2Int(-1, 0));
         }
 
-        //もしクリアしていたら
-        if (IsCreared())
+        // もしクリアしていたら
+        if (IsCleared())
         {
             Debug.Log("Clear!!!");
             clearText.SetActive(true);
         }
     }
+
 }
