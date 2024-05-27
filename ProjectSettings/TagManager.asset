@@ -6,6 +6,7 @@ TagManager:
   tags:
   - Box
   - ClearText
+  - Wall
   layers:
   - Default
   - TransparentFX
