@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using UnityEditor;
 using UnityEngine;
 
 public class GameManagerScript : MonoBehaviour
@@ -10,8 +11,48 @@ public class GameManagerScript : MonoBehaviour
     public GameObject clearText;
     public GameObject particlePrefab;
     public GameObject wallPrefab;
+
     int[,] map;
     GameObject[,] field;
+    int currentStage = 0;
+
+    Stack<Vector2Int[]> moveHistory = new Stack<Vector2Int[]>();
+
+    int[][,] stages = new int[3][,]
+   {
+        new int[,]
+        {
+            {4, 4, 4, 4, 4, 4, 4, 4, 4, 4},
+            {4, 0, 0, 0, 3, 4, 0, 0, 0, 4},
+            {4, 0, 2, 0, 0, 0, 2, 0, 0, 4},
+            {4, 0, 1, 2, 0, 4, 3, 0, 0, 4},
+            {4, 0, 0, 4, 0, 0, 0, 0, 0, 4},
+            {4, 0, 3, 0, 2, 0, 2, 0, 0, 4},
+            {4, 0, 0, 0, 0, 3, 0, 4, 3, 4},
+            {4, 4, 4, 4, 4, 4, 4, 4, 4, 4}
+        },
+        new int[,]
+        {
+            {4, 4, 4, 4, 4, 4, 4, 4, 4, 4},
+            {4, 0, 3, 0, 2, 0, 0, 3, 0, 4},
+            {4, 0, 0, 4, 0, 4, 2, 0, 0, 4},
+            {4, 0, 1, 0, 3, 0, 2, 0, 0, 4},
+            {4, 0, 0, 4, 0, 4, 0, 0, 0, 4},
+            {4, 0, 0, 0, 2, 0, 0, 3, 0, 4},
+            {4, 4, 4, 4, 4, 4, 4, 4, 4, 4}
+        },
+        new int[,]
+        {
+            {4, 4, 4, 4, 4, 4, 4, 4, 4, 4},
+            {4, 0, 0, 3, 0, 0, 0, 0, 0, 4},
+            {4, 0, 2, 0, 4, 2, 4, 0, 2, 4},
+            {4, 0, 1, 2, 0, 4, 3, 0, 0, 4},
+            {4, 0, 0, 4, 0, 4, 0, 0, 0, 4},
+            {4, 0, 3, 0, 2, 0, 2, 0, 0, 4},
+            {4, 0, 0, 0, 0, 3, 0, 4, 3, 4},
+            {4, 4, 4, 4, 4, 4, 4, 4, 4, 4}
+        }
+   };
 
     Vector2Int GetPlayerIndex()
     {
@@ -31,13 +72,11 @@ public class GameManagerScript : MonoBehaviour
         if (moveTo.y < 0 || moveTo.y >= field.GetLength(0)) { return false; }
         if (moveTo.x < 0 || moveTo.x >= field.GetLength(1)) { return false; }
 
-        // 壁のチェックを追加
         if (field[moveTo.y, moveTo.x] != null && field[moveTo.y, moveTo.x].CompareTag("Wall"))
         {
             return false;
         }
 
-        // nullチェックしてからタグチェックを行う
         if (field[moveTo.y, moveTo.x] != null && field[moveTo.y, moveTo.x].tag == "Box")
         {
             Vector2Int velocity = moveTo - moveFrom;
@@ -53,13 +92,11 @@ public class GameManagerScript : MonoBehaviour
             moveComponent.MoveTo(moveToPosition);
         }
 
-        // パーティクルを生成
         Vector3 moveFromPosition = new Vector3(moveFrom.x, map.GetLength(0) - 1 - moveFrom.y, 0);
-        int numberOfParticles = 8; // 生成するパーティクルの数
+        int numberOfParticles = 8;
 
         for (int i = 0; i < numberOfParticles; i++)
         {
-            // 生成位置をランダムにオフセット
             Vector3 randomOffset = new Vector3(Random.Range(-0.5f, 0.5f), Random.Range(-0.5f, 0.5f), 0);
             Vector3 particlePosition = moveFromPosition + randomOffset;
             GameObject particle = Instantiate(particlePrefab, particlePosition, Quaternion.identity);
@@ -68,58 +105,54 @@ public class GameManagerScript : MonoBehaviour
         field[moveTo.y, moveTo.x] = field[moveFrom.y, moveFrom.x];
         field[moveFrom.y, moveFrom.x] = null;
 
+        moveHistory.Push(new Vector2Int[] { moveFrom, moveTo });
+
         return true;
     }
 
-
     bool IsCleared()
     {
-        //Vector2Int型の可変長配列の作成
         List<Vector2Int> goals = new();
 
         for (int y = 0; y < field.GetLength(0); y++)
         {
             for (int x = 0; x < field.GetLength(1); x++)
             {
-                //格納場所が否かどうか
                 if (map[y, x] == 3)
                 {
-                    //格納場所のインデックスを控えておく
                     goals.Add(new Vector2Int(x, y));
                 }
             }
         }
 
-        // 要素数はgoals.Countで取得
         foreach (Vector2Int goal in goals)
         {
             if (field[goal.y, goal.x] == null || !field[goal.y, goal.x].CompareTag("Box"))
             {
-                // 一つでも箱がなかったら条件未達成
                 return false;
             }
         }
-        //条件未達成でなければ条件達成
         return true;
     }
 
-    // Start is called before the first frame update
-    void Start()
+    void ClearStage()
     {
-        //解像度とウィンドウモード
-        Screen.SetResolution(1280, 720, false);
-        map = new int[,]    //3を格納場所とする
+        for (int y = 0; y < field.GetLength(0); y++)
         {
-            {4, 4, 4, 4, 4, 4, 4, 4, 4, 4},
-            {4, 0, 0, 0, 3, 4, 0, 0, 0, 4},
-            {4, 0, 2, 0, 0, 0, 2, 0, 0, 4},
-            {4, 0, 1, 2, 0, 4, 3, 0, 0, 4},
-            {4, 0, 0, 4, 0, 0, 0, 0, 0, 4},
-            {4, 0, 3, 0, 2, 0, 2, 0, 0, 4},
-            {4, 0, 0, 0, 0, 3, 0, 4, 3, 4},
-            {4, 4, 4, 4, 4, 4, 4, 4, 4, 4}
-        };
+            for (int x = 0; x < field.GetLength(1); x++)
+            {
+                if (field[y, x] != null)
+                {
+                    Destroy(field[y, x]);
+                }
+            }
+        }
+        moveHistory.Clear();
+    }
 
+    void LoadStage(int stageIndex)
+    {
+        map = stages[stageIndex];
         field = new GameObject
         [
             map.GetLength(0),
@@ -146,12 +179,16 @@ public class GameManagerScript : MonoBehaviour
                 {
                     field[y, x] = Instantiate(wallPrefab, new Vector3(x, map.GetLength(0) - 1 - y, 0), Quaternion.identity);
                 }
-
             }
         }
     }
 
-    // Update is called once per frame
+    void Start()
+    {
+        Screen.SetResolution(1280, 720, false);
+        LoadStage(currentStage);
+    }
+
     void Update()
     {
         if (Input.GetKeyDown(KeyCode.UpArrow))
@@ -178,12 +215,38 @@ public class GameManagerScript : MonoBehaviour
             MoveNumber("Player", playerIndex, playerIndex + new Vector2Int(-1, 0));
         }
 
-        // もしクリアしていたら
+        if (Input.GetKeyDown(KeyCode.Z) && moveHistory.Count > 0)
+        {
+            Vector2Int[] lastMove = moveHistory.Pop();
+            Vector2Int moveTo = lastMove[0];
+            Vector2Int moveFrom = lastMove[1];
+
+            Vector3 moveToPosition = new Vector3(moveTo.x, map.GetLength(0) - 1 - moveTo.y, 0);
+            Move moveComponent = field[moveFrom.y, moveFrom.x].GetComponent<Move>();
+
+            if (moveComponent != null)
+            {
+                moveComponent.MoveTo(moveToPosition);
+            }
+
+            field[moveTo.y, moveTo.x] = field[moveFrom.y, moveFrom.x];
+            field[moveFrom.y, moveFrom.x] = null;
+        }
+
         if (IsCleared())
         {
             Debug.Log("Clear!!!");
-            clearText.SetActive(true);
+            currentStage++;
+
+            if (currentStage < stages.Length)
+            {
+                ClearStage();
+                LoadStage(currentStage);
+            }
+            else
+            {
+                clearText.SetActive(true);
+            }
         }
     }
-
 }
