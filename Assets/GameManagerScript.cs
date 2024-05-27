@@ -18,40 +18,20 @@ public class GameManagerScript : MonoBehaviour
 
     Stack<Vector2Int[]> moveHistory = new Stack<Vector2Int[]>();
 
-    int[][,] stages = new int[3][,]
+    int[][,] stages = new int[1][,]
    {
-        new int[,]
-        {
-            {4, 4, 4, 4, 4, 4, 4, 4, 4, 4},
-            {4, 0, 0, 0, 3, 4, 0, 0, 0, 4},
-            {4, 0, 2, 0, 0, 0, 2, 0, 0, 4},
-            {4, 0, 1, 2, 0, 4, 3, 0, 0, 4},
-            {4, 0, 0, 4, 0, 0, 0, 0, 0, 4},
-            {4, 0, 3, 0, 2, 0, 2, 0, 0, 4},
-            {4, 0, 0, 0, 0, 3, 0, 4, 3, 4},
-            {4, 4, 4, 4, 4, 4, 4, 4, 4, 4}
-        },
-        new int[,]
-        {
-            {4, 4, 4, 4, 4, 4, 4, 4, 4, 4},
-            {4, 0, 3, 0, 2, 0, 0, 3, 0, 4},
-            {4, 0, 0, 4, 0, 4, 2, 0, 0, 4},
-            {4, 0, 1, 0, 3, 0, 2, 0, 0, 4},
-            {4, 0, 0, 4, 0, 4, 0, 0, 0, 4},
-            {4, 0, 0, 0, 2, 0, 0, 3, 0, 4},
-            {4, 4, 4, 4, 4, 4, 4, 4, 4, 4}
-        },
-        new int[,]
+       new int[,]
         {
             {4, 4, 4, 4, 4, 4, 4, 4, 4, 4},
             {4, 0, 0, 3, 0, 0, 0, 0, 0, 4},
-            {4, 0, 2, 0, 4, 2, 4, 0, 2, 4},
+            {4, 0, 2, 0, 4, 4, 4, 0, 2, 4},
             {4, 0, 1, 2, 0, 4, 3, 0, 0, 4},
             {4, 0, 0, 4, 0, 4, 0, 0, 0, 4},
             {4, 0, 3, 0, 2, 0, 2, 0, 0, 4},
             {4, 0, 0, 0, 0, 3, 0, 4, 3, 4},
             {4, 4, 4, 4, 4, 4, 4, 4, 4, 4}
         }
+
    };
 
     Vector2Int GetPlayerIndex()
@@ -137,6 +117,7 @@ public class GameManagerScript : MonoBehaviour
 
     void ClearStage()
     {
+        // フィールド上のすべてのオブジェクトを削除
         for (int y = 0; y < field.GetLength(0); y++)
         {
             for (int x = 0; x < field.GetLength(1); x++)
@@ -144,10 +125,14 @@ public class GameManagerScript : MonoBehaviour
                 if (field[y, x] != null)
                 {
                     Destroy(field[y, x]);
+                    field[y, x] = null;  // この行を追加してフィールド配列をクリア
                 }
             }
         }
         moveHistory.Clear();
+
+        // クリア画面を表示
+        clearText.SetActive(true);
     }
 
     void LoadStage(int stageIndex)
@@ -173,13 +158,26 @@ public class GameManagerScript : MonoBehaviour
                 }
                 if (map[y, x] == 3)
                 {
-                    field[y, x] = Instantiate(goalPrefab, new Vector3(x, map.GetLength(0) - 1 - y, 0), Quaternion.identity);
+                    field[y, x] = Instantiate(goalPrefab, new Vector3(x, field.GetLength(0) - 1 - y, 0), Quaternion.identity);
                 }
                 if (map[y, x] == 4)
                 {
                     field[y, x] = Instantiate(wallPrefab, new Vector3(x, map.GetLength(0) - 1 - y, 0), Quaternion.identity);
                 }
             }
+        }
+
+        switch (stageIndex)
+        {
+            case 0:
+                map = stages[0];
+                break;
+            case 1:
+                map = stages[1];
+                break;
+            case 2:
+                map = stages[2];
+                break;
         }
     }
 
@@ -191,30 +189,29 @@ public class GameManagerScript : MonoBehaviour
 
     void Update()
     {
+        // プレイヤーの移動処理
         if (Input.GetKeyDown(KeyCode.UpArrow))
         {
             Vector2Int playerIndex = GetPlayerIndex();
             MoveNumber("Player", playerIndex, playerIndex + new Vector2Int(0, -1));
         }
-
         if (Input.GetKeyDown(KeyCode.DownArrow))
         {
             Vector2Int playerIndex = GetPlayerIndex();
             MoveNumber("Player", playerIndex, playerIndex + new Vector2Int(0, 1));
         }
-
         if (Input.GetKeyDown(KeyCode.RightArrow))
         {
             Vector2Int playerIndex = GetPlayerIndex();
             MoveNumber("Player", playerIndex, playerIndex + new Vector2Int(1, 0));
         }
-
         if (Input.GetKeyDown(KeyCode.LeftArrow))
         {
             Vector2Int playerIndex = GetPlayerIndex();
             MoveNumber("Player", playerIndex, playerIndex + new Vector2Int(-1, 0));
         }
 
+        // 移動履歴を元に戻す処理
         if (Input.GetKeyDown(KeyCode.Z) && moveHistory.Count > 0)
         {
             Vector2Int[] lastMove = moveHistory.Pop();
@@ -233,6 +230,7 @@ public class GameManagerScript : MonoBehaviour
             field[moveFrom.y, moveFrom.x] = null;
         }
 
+        // ステージクリア判定
         if (IsCleared())
         {
             Debug.Log("Clear!!!");
@@ -249,4 +247,5 @@ public class GameManagerScript : MonoBehaviour
             }
         }
     }
+
 }
