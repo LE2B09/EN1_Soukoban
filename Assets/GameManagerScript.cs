@@ -87,6 +87,8 @@ public class GameManagerScript : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
+        //解像度とウィンドウモード
+        Screen.SetResolution(1280, 720, false);
         map = new int[,]    //3を格納場所とする
         {
             {0, 0, 0, 0, 0},
