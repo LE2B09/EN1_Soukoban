@@ -9,6 +9,7 @@ public class GameManagerScript : MonoBehaviour
     public GameObject goalPrefab;
     public GameObject clearText;
     public GameObject particlePrefab;
+    public GameObject wallPrefab;
     int[,] map;
     GameObject[,] field;
 
@@ -29,6 +30,12 @@ public class GameManagerScript : MonoBehaviour
     {
         if (moveTo.y < 0 || moveTo.y >= field.GetLength(0)) { return false; }
         if (moveTo.x < 0 || moveTo.x >= field.GetLength(1)) { return false; }
+
+        // 壁のチェックを追加
+        if (field[moveTo.y, moveTo.x] != null && field[moveTo.y, moveTo.x].CompareTag("Wall"))
+        {
+            return false;
+        }
 
         // nullチェックしてからタグチェックを行う
         if (field[moveTo.y, moveTo.x] != null && field[moveTo.y, moveTo.x].tag == "Box")
@@ -96,7 +103,6 @@ public class GameManagerScript : MonoBehaviour
         return true;
     }
 
-
     // Start is called before the first frame update
     void Start()
     {
@@ -104,11 +110,14 @@ public class GameManagerScript : MonoBehaviour
         Screen.SetResolution(1280, 720, false);
         map = new int[,]    //3を格納場所とする
         {
-            {0, 0, 0, 0, 0},
-            {0, 0, 1, 2, 3},
-            {0, 0, 2, 0, 0},
-            {0, 0, 3, 0, 0},
-            {0, 0, 0, 0, 0}
+            {4, 4, 4, 4, 4, 4, 4, 4, 4, 4},
+            {4, 0, 0, 0, 3, 4, 0, 0, 0, 4},
+            {4, 0, 2, 0, 0, 0, 2, 0, 0, 4},
+            {4, 0, 1, 2, 0, 4, 3, 0, 0, 4},
+            {4, 0, 0, 4, 0, 0, 0, 0, 0, 4},
+            {4, 0, 3, 0, 2, 0, 2, 0, 0, 4},
+            {4, 0, 0, 0, 0, 3, 0, 4, 3, 4},
+            {4, 4, 4, 4, 4, 4, 4, 4, 4, 4}
         };
 
         field = new GameObject
@@ -133,6 +142,11 @@ public class GameManagerScript : MonoBehaviour
                 {
                     field[y, x] = Instantiate(goalPrefab, new Vector3(x, map.GetLength(0) - 1 - y, 0), Quaternion.identity);
                 }
+                if (map[y, x] == 4)
+                {
+                    field[y, x] = Instantiate(wallPrefab, new Vector3(x, map.GetLength(0) - 1 - y, 0), Quaternion.identity);
+                }
+
             }
         }
     }
