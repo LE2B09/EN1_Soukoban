@@ -8,6 +8,7 @@ public class GameManagerScript : MonoBehaviour
     public GameObject boxPrefab;
     public GameObject goalPrefab;
     public GameObject clearText;
+    public GameObject particlePrefab;
     int[,] map;
     GameObject[,] field;
 
@@ -43,6 +44,18 @@ public class GameManagerScript : MonoBehaviour
         if (moveComponent != null)
         {
             moveComponent.MoveTo(moveToPosition);
+        }
+
+        // パーティクルを生成
+        Vector3 moveFromPosition = new Vector3(moveFrom.x, map.GetLength(0) - 1 - moveFrom.y, 0);
+        int numberOfParticles = 8; // 生成するパーティクルの数
+
+        for (int i = 0; i < numberOfParticles; i++)
+        {
+            // 生成位置をランダムにオフセット
+            Vector3 randomOffset = new Vector3(Random.Range(-0.5f, 0.5f), Random.Range(-0.5f, 0.5f), 0);
+            Vector3 particlePosition = moveFromPosition + randomOffset;
+            GameObject particle = Instantiate(particlePrefab, particlePosition, Quaternion.identity);
         }
 
         field[moveTo.y, moveTo.x] = field[moveFrom.y, moveFrom.x];
